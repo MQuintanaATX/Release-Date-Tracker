@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReleaseDateTracker", "Release Date Tracker\ReleaseDateTracker.csproj", "{F1F241E4-AEC2-4F6F-9B2B-CC7CF2EFF349}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReleaseDateTrackerTests", "ReleaseDateTrackerTests\ReleaseDateTrackerTests.csproj", "{DA43827D-B849-4DB8-80E9-8FD94C13CC88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1F241E4-AEC2-4F6F-9B2B-CC7CF2EFF349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1F241E4-AEC2-4F6F-9B2B-CC7CF2EFF349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1F241E4-AEC2-4F6F-9B2B-CC7CF2EFF349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1F241E4-AEC2-4F6F-9B2B-CC7CF2EFF349}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA43827D-B849-4DB8-80E9-8FD94C13CC88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA43827D-B849-4DB8-80E9-8FD94C13CC88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA43827D-B849-4DB8-80E9-8FD94C13CC88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA43827D-B849-4DB8-80E9-8FD94C13CC88}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E187A298-0FA6-41B9-990C-26F2605D749C}
+	EndGlobalSection
+EndGlobal
