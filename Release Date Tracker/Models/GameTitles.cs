@@ -2,6 +2,8 @@
 {
     public class GameTitles
     {
-        public Dictionary<int, GameTitle> Titles { get; set; } = new Dictionary<int, GameTitle> { { 123, new GameTitle() } };
+        public Dictionary<long, GameTitle> Titles { get; set; } = new Dictionary<long, GameTitle> {};
+        public DateTime LastRetrievedDate { get; set; }
+
     }
 }

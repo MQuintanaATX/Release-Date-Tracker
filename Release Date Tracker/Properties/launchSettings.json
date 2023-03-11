@@ -14,7 +14,11 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:61081",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Igdb__ClientId": "jl1j5ofmly4p6qosv7hjgarojtd0vu",
+        // Secrets are set below -- NEVER CHECK IN
+        // Set in User Secrets File
+        "Igdb__ClientSecret": ""
       }
     },
     "IIS Express": {

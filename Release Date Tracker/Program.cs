@@ -1,10 +1,10 @@
 using Microsoft.OpenApi.Models;
 using Release_Date_Tracker.Accessors;
 using Release_Date_Tracker.Managers;
+using Release_Date_Tracker.Models.Configuration_Settings;
 
 var builder = WebApplication.CreateBuilder(args);
-
-ConfigureServices(builder.Services);
+ConfigureServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 Configure(app, builder.Services);
@@ -12,12 +12,17 @@ Configure(app, builder.Services);
 app.Run();
 
 
-void ConfigureServices(IServiceCollection services)
+void ConfigureServices(IServiceCollection services, ConfigurationManager configuration)
 {
     services.AddSingleton<IIgdbAccessor, IgdbAccessor>();
     services.AddSingleton<IGameTitleManager, GameTitleManager>();
     services.AddControllers();
     services.AddEndpointsApiExplorer();
+
+    // IGDB API configuration
+    var igdbSection = configuration.GetSection("Igdb");
+    var igdbConfiguration = igdbSection.Get<IgdbConfiguration>();
+    services.AddSingleton(igdbConfiguration);
 
     // Swagger set up
     services.AddMvc();
@@ -35,7 +40,6 @@ void ConfigureServices(IServiceCollection services)
                 Email = "mquintana78750@gmail.com",
             }
         });
-
     });
 }
 
