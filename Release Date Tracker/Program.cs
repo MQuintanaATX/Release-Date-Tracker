@@ -1,5 +1,7 @@
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Release_Date_Tracker.Accessors;
+using Release_Date_Tracker.Clients;
 using Release_Date_Tracker.Managers;
 using Release_Date_Tracker.Models.Configuration_Settings;
 
@@ -16,13 +18,19 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager configu
 {
     services.AddSingleton<IIgdbAccessor, IgdbAccessor>();
     services.AddSingleton<IGameTitleManager, GameTitleManager>();
+    services.AddSingleton<NodaTime.IClock>(NodaTime.SystemClock.Instance);
     services.AddControllers();
     services.AddEndpointsApiExplorer();
 
     // IGDB API configuration
     var igdbSection = configuration.GetSection("Igdb");
     var igdbConfiguration = igdbSection.Get<IgdbConfiguration>();
-    services.AddSingleton(igdbConfiguration);
+    if (igdbConfiguration != null)
+    {
+        services.AddSingleton(igdbConfiguration);
+        services.AddSingleton<ITwitchClient, TwitchClient>();
+    }
+    else throw new Exception("No IGDB Configuration Section Present");
 
     // Swagger set up
     services.AddMvc();

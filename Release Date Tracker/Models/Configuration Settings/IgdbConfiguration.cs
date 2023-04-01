@@ -6,7 +6,7 @@
     public class IgdbConfiguration
     {
         public string ConfigSection => "Igdb";
-        public string ClientId { get; set; } = string.Empty;
-        public string ClientSecret { get; set;} = string.Empty;
+        public required string ClientId { get; set; } 
+        public required string ClientSecret { get; set;}
     }
 }
