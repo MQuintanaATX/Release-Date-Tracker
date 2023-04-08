@@ -1,6 +1,5 @@
 ﻿using AutoFixture;
-using IGDB;
-using IGDB.Models;
+using FluentAssertions;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
@@ -8,6 +7,8 @@ using NodaTime;
 using NodaTime.Testing;
 using Release_Date_Tracker.Accessors;
 using Release_Date_Tracker.Clients;
+using Release_Date_Tracker.Models;
+using Release_Date_Tracker.Models.ClientModels;
 using Release_Date_Tracker.Models.Configuration_Settings;
 using System.Net;
 using Xunit;
@@ -33,37 +34,64 @@ namespace ReleaseDateTrackerTests.Accessors
         public async Task GetGameTitlesAsync_Returns_Expected()
         {
             /* Arrange */
+            var platforms = new Mock<Platform>();
+
             var games = _fixture.Build<Game>()
-                .With(x => x.Platforms.Ids, new long [1])
+                .With(x => x.PlatformIds, new List<long> { 1 })
                 .CreateMany(100)
                 .ToArray();
-
-            var messageHandler = new Mock<HttpMessageHandler>();
-            messageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync",
-                                              ItExpr.IsAny<HttpRequestMessage>(),
-                                              ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(JsonConvert.SerializeObject(games))
-                });
 
             _clientMock.Setup(x => x.QueryGamesAsync(It.IsAny<string>()))
                 .ReturnsAsync(games);
 
             _clientMock.Setup(x => x.QueryPlatformsAsync(It.IsAny<string>()))
-                .ReturnsAsync(new PlatformFamily[]
+                .ReturnsAsync(new Platform[]
                 {
-                    new PlatformFamily
+                    new()
                     {
-                        Id = 1
+                        Id = 1,
+                        Name = "Platform",
+                        PlatformFamily = 100
                     }
                 });
 
+            _clientMock.Setup(x => x.QueryPlatformFamiliesAsync(It.IsAny<string>()))
+                .ReturnsAsync(new PlatformFamily[]
+                {
+                    new PlatformFamily()
+                    {
+                        Id = 100,
+                        Name = "Platform Family",
+                    }
+                });
+
+            var titles = new Dictionary<long, GameTitle>();
+
+            foreach(var game in games)
+            {
+
+                var gameTitle = new GameTitle
+                {
+                    Id = (long)game.Id,
+                    Title = game.Name,
+                    ReleaseDate = game.FirstReleaseDate,
+                    Platforms = new List<string> { "Platform"},
+                    Description = game.Summary
+                };
+                titles.Add(game.Id, gameTitle);
+            }
+
+            var expectedGameTitles = new GameTitles
+            {
+                LastRetrievedDate = _clockMock.GetCurrentInstant().ToDateTimeUtc(),
+                Titles = titles
+            };
+
             /* Act */
             var actualGameTitles = await _sut.GetGameAllTitlesAsync();
+
             /* Assert*/
+            actualGameTitles.Should().BeEquivalentTo(expectedGameTitles);
         }
     }
 }

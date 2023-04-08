@@ -1,4 +1,4 @@
-﻿using IGDB.Models;
+﻿using Release_Date_Tracker.Models.ClientModels;
 
 namespace Release_Date_Tracker.Clients
 {

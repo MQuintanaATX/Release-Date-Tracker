@@ -1,12 +1,7 @@
-﻿
-using IGDB;
-using IGDB.Models;
-using NodaTime;
-using NodaTime.Extensions;
+﻿using NodaTime;
 using Release_Date_Tracker.Clients;
 using Release_Date_Tracker.Models;
-using Release_Date_Tracker.Models.Configuration_Settings;
-using System.Text.RegularExpressions;
+using Release_Date_Tracker.Models.ClientModels;
 
 namespace Release_Date_Tracker.Accessors
 {
@@ -26,10 +21,10 @@ namespace Release_Date_Tracker.Accessors
         public async Task<GameTitles> GetGameAllTitlesAsync()
         {
             // Check to see if the data is stored in memory, and is recent; if so, return the existing values
-            if (_gameTitles.LastRetrievedDate > DateTime.Now.AddDays(-7))
-            {
-                return _gameTitles;
-            }
+            //if (_gameTitles.LastRetrievedDate > DateTime.Now.AddDays(-7))
+            //{
+            //    return _gameTitles;
+            //}
 
             // Get Platform information to display user friendly names later, and to refine results from API
             var platformIds = await GetPlatformIds();
@@ -41,7 +36,7 @@ namespace Release_Date_Tracker.Accessors
 
             // Get a list of games for PC, Xbox, Sony, and Nintendo clients
             // Gets a living list of platform IDs; this will catch future console releases from the big three and for PCs
-            var queryString = $"fields id, name, first_release_date, summary, platforms; limit 500; where first_release_date > {date} & platforms = ({string.Join(",", platformIds.Where(x => x != null))});";
+            var queryString = $"fields id, name, first_release_date, summary, platforms; limit 500; where first_release_date > {date} & platforms = ({string.Join(",", platformIds)});";
             var gameResponses = await _iGDBClient.QueryGamesAsync(queryString);
             var games = new List<Game>(gameResponses.ToList());
 
@@ -68,7 +63,7 @@ namespace Release_Date_Tracker.Accessors
         private Task<GameTitle> ConvertToGameTitleAsync(Game game, Dictionary<long, string> platforms)
         {
             var platformNames = new List<string>();
-            foreach (var id in game.Platforms.Ids)
+            foreach (var id in game.PlatformIds)
             {
                 platforms.TryGetValue(id, out var platformName);
                 // If we are missing a localization, instead add a strng showing the ID for later troubleshooting
@@ -86,14 +81,13 @@ namespace Release_Date_Tracker.Accessors
         }
 
         // Gets a list of Platforms from the API; this will help provide readable results to the end user
-        private async Task<Dictionary<long, string>> GetPlatformInformationAsync(List<long?> platformIds)
+        private async Task<Dictionary<long, string>> GetPlatformInformationAsync(List<int> platformIds)
         {
             var platforms = new Dictionary<long,string>();
-            var platformResponses = await _iGDBClient.QueryPlatformFamiliesAsync("fields *; limit 500;");
+            var platformResponses = await _iGDBClient.QueryPlatformsAsync("fields *; limit 500;");
 
             foreach(var platform in platformResponses.Where(x => platformIds.Contains(x.Id)))
             {
-                if (platform.Id is null) continue;
                 platforms.Add((long)platform.Id, platform.Name);
             }
 
@@ -101,7 +95,7 @@ namespace Release_Date_Tracker.Accessors
         }
 
         // Get a list of platorm IDs that belong to the big three and PC platforms. 
-        private async Task<List<long?>> GetPlatformIds()
+        private async Task<List<int>> GetPlatformIds()
         {
             var platformFamilies = await _iGDBClient.QueryPlatformFamiliesAsync("fields *; limit 500;");
             var familyIds = platformFamilies.Select(x => x.Id).ToList();
