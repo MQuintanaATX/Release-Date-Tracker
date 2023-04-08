@@ -14,7 +14,7 @@ namespace Release_Date_Tracker.Managers
 
         public async Task<List<GameTitle>> GetAllGames()
         {
-            var gameTitlesDictionary = await _igdbAccessor.GetGameTitlesAsync();
+            var gameTitlesDictionary = await _igdbAccessor.GetGameAllTitlesAsync();
             return gameTitlesDictionary.Titles.Values.ToList();
         }
     }

@@ -4,6 +4,6 @@ namespace Release_Date_Tracker.Accessors
 {
     public interface IIgdbAccessor
     {
-        public Task<GameTitles> GetGameTitlesAsync();
+        public Task<GameTitles> GetGameAllTitlesAsync();
     }
 }
