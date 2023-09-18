@@ -18,7 +18,9 @@
         "Igdb__ClientId": "jl1j5ofmly4p6qosv7hjgarojtd0vu",
         // Secrets are set below -- NEVER CHECK IN
         // Set in User Secrets File
-        "Igdb__ClientSecret": ""
+        "Igdb__ClientSecret": "",
+        "Key": "",
+        "Issuer": ""
       }
     },
     "IIS Express": {
