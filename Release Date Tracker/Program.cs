@@ -1,9 +1,12 @@
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Release_Date_Tracker.Accessors;
 using Release_Date_Tracker.Clients;
 using Release_Date_Tracker.Managers;
+using Release_Date_Tracker.Models;
 using Release_Date_Tracker.Models.Configuration_Settings;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigureServices(builder.Services, builder.Configuration);
@@ -44,10 +47,37 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager configu
             Description = "Release Date Tracker API",
             Contact = new OpenApiContact
             {
-                Name = "Michael QUintana",
+                Name = "Michael Quintana",
                 Email = "mquintana78750@gmail.com",
             }
         });
+    });
+
+    // Authentication Set up
+    var key = configuration["Key"];
+    var issuer = configuration["Issuer"];
+
+    var credentials = new Credentials
+    {
+        Key = key,
+        Issuer = issuer
+    };
+
+    services.AddSingleton(credentials);
+
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(x =>
+    {
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateLifetime = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = issuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(credentials.Key))
+       };
     });
 }
 
@@ -71,5 +101,8 @@ void Configure(WebApplication app, IServiceCollection services)
         c.RoutePrefix = string.Empty;
     });
 
-  
+    // Enable Auth
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization(); 
 }
