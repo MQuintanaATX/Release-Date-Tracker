@@ -1,16 +1,15 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using Moq;
+using NSubstitute;
 using Release_Date_Tracker.Accessors;
 using Release_Date_Tracker.Managers;
 using Release_Date_Tracker.Models;
-using System.Security.Cryptography.X509Certificates;
 
 namespace ReleaseDateTrackerTests.Managers
 {
     public class GameTitleManagerTests
     {
-        private Mock<IIgdbAccessor> _accessorMock  = new();
+        private IIgdbAccessor _accessorMock  = Substitute.For<IIgdbAccessor>();
 
         private GameTitleManager _sut;
 
@@ -18,7 +17,7 @@ namespace ReleaseDateTrackerTests.Managers
 
         public GameTitleManagerTests()
         {
-            _sut = new GameTitleManager(_accessorMock.Object);
+            _sut = new GameTitleManager(_accessorMock);
         }
 
         [Test]
@@ -37,8 +36,8 @@ namespace ReleaseDateTrackerTests.Managers
                     Title = x.Title
                 });
 
-            _accessorMock.Setup(x => x.GetGameAllTitlesAsync())
-                .ReturnsAsync(new GameTitles
+            _accessorMock.GetGameAllTitlesAsync()
+                .Returns(new GameTitles
                 {
                     Titles = accessorTitles
                 });
