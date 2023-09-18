@@ -59,8 +59,8 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager configu
 
     var credentials = new Credentials
     {
-        Key = key,
-        Issuer = issuer
+        Key = key ?? string.Empty,
+        Issuer = issuer ?? string.Empty
     };
 
     services.AddSingleton(credentials);

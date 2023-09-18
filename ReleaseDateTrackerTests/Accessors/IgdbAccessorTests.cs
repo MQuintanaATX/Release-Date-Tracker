@@ -1,24 +1,19 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using Moq;
-using Moq.Protected;
-using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Testing;
+using NSubstitute;
 using Release_Date_Tracker.Accessors;
 using Release_Date_Tracker.Clients;
 using Release_Date_Tracker.Models;
 using Release_Date_Tracker.Models.ClientModels;
-using Release_Date_Tracker.Models.Configuration_Settings;
-using System.Net;
-using Xunit;
 
 namespace ReleaseDateTrackerTests.Accessors
 {
     public class IgdbAccessorTests
     {
         private readonly IClock _clockMock;
-        private readonly Mock<ITwitchClient> _clientMock = new();
+        private readonly ITwitchClient _clientMock = Substitute.For<ITwitchClient>();
 
         private Fixture _fixture = new Fixture();
 
@@ -27,25 +22,23 @@ namespace ReleaseDateTrackerTests.Accessors
         {
             _clockMock = new FakeClock(Instant.FromUtc(2000, 1, 1, 0, 0));
 
-            _sut = new IgdbAccessor(_clientMock.Object, _clockMock);
+            _sut = new IgdbAccessor(_clientMock, _clockMock);
         }
 
         [Test]
         public async Task GetGameTitlesAsync_Returns_Expected()
         {
             /* Arrange */
-            var platforms = new Mock<Platform>();
-
             var games = _fixture.Build<Game>()
                 .With(x => x.PlatformIds, new List<long> { 1 })
                 .CreateMany(100)
                 .ToArray();
 
-            _clientMock.Setup(x => x.QueryGamesAsync(It.IsAny<string>()))
-                .ReturnsAsync(games);
+            _clientMock.QueryGamesAsync(Arg.Any<string>())
+                .Returns(games);
 
-            _clientMock.Setup(x => x.QueryPlatformsAsync(It.IsAny<string>()))
-                .ReturnsAsync(new Platform[]
+            _clientMock.QueryPlatformsAsync(Arg.Any<string>())
+                .Returns(new Platform[]
                 {
                     new()
                     {
@@ -55,8 +48,8 @@ namespace ReleaseDateTrackerTests.Accessors
                     }
                 });
 
-            _clientMock.Setup(x => x.QueryPlatformFamiliesAsync(It.IsAny<string>()))
-                .ReturnsAsync(new PlatformFamily[]
+            _clientMock.QueryPlatformFamiliesAsync(Arg.Any<string>())
+                .Returns(new PlatformFamily[]
                 {
                     new PlatformFamily()
                     {

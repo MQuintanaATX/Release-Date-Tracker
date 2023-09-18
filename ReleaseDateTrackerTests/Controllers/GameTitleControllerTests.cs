@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Moq;
+using NSubstitute;
 using Release_Date_Tracker.Controllers;
 using Release_Date_Tracker.Managers;
 using Release_Date_Tracker.Models;
@@ -8,13 +8,13 @@ namespace ReleaseDateTrackerTests.Controllers
 {
     public class GameTitleControllerTests
     {
-        private readonly Mock<IGameTitleManager> _gameTitleManagerMock = new ();
+        private readonly IGameTitleManager _gameTitleManagerMock = Substitute.For<IGameTitleManager>();
 
         private readonly GameTitleController _sut;
 
         public GameTitleControllerTests() 
         { 
-            _sut = new GameTitleController(_gameTitleManagerMock.Object);
+            _sut = new GameTitleController(_gameTitleManagerMock);
         }
 
         [Test]
@@ -30,15 +30,15 @@ namespace ReleaseDateTrackerTests.Controllers
                     }
                 };
 
-            _gameTitleManagerMock.Setup(x => x.GetAllGames())
-                .ReturnsAsync(expectedGameTitles);
+            _gameTitleManagerMock.GetAllGames()
+                .Returns(expectedGameTitles);
 
             /* Act */
             var actualGameTitles = await _sut.GetAllTitlesAsync();
 
             /* Assert */
             actualGameTitles.Should().BeEquivalentTo(expectedGameTitles);
-            _gameTitleManagerMock.Verify(x => x.GetAllGames(), Times.Once());
+            await _gameTitleManagerMock.Received().GetAllGames();
         }
     }
 }
