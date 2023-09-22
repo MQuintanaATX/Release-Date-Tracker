@@ -10,16 +10,17 @@ namespace Release_Date_Tracker.Controllers;
 [Authorize]
 public class GameTitleController : Controller
 {
-    private readonly IGameTitleManager _gameTitleManager;
+    private readonly IIgdbManager _igdbManager;
 
-    public GameTitleController(IGameTitleManager gameTitleManager)
+    public GameTitleController(IIgdbManager igdbManager)
     {
-        _gameTitleManager = gameTitleManager;
+        _igdbManager = igdbManager;
     }
 
     [HttpGet(("getAllTitles"))]
     public async Task<List<GameTitle>> GetAllTitlesAsync()
     {
-        return await _gameTitleManager.GetAllGames();
+        var gameTitlesDictionary = await _igdbManager.GetGameAllTitlesAsync();
+        return gameTitlesDictionary.Titles.Values.ToList();
     }
 }
