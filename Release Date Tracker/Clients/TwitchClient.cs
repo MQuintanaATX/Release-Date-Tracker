@@ -2,70 +2,70 @@
 using Release_Date_Tracker.Models.Configuration_Settings;
 using RestEase;
 using Release_Date_Tracker.Models.ClientModels;
+using Release_Date_Tracker.Accessors;
 
-namespace Release_Date_Tracker.Clients
+namespace Release_Date_Tracker.Clients;
+
+public class TwitchClient : IGamesAccessor, IPlatformFamiliesAccessor, IPlatformsAccessor
 {
-    public class TwitchClient : ITwitchClient
+    private readonly IGDBClient _iGDBClient;
+
+    public TwitchClient(IgdbConfiguration configuration)
     {
-        private readonly IGDBClient _iGDBClient;
-
-        public TwitchClient(IgdbConfiguration configuration)
+        _iGDBClient = new IGDBClient(configuration.ClientId, configuration.ClientSecret);
+    }
+    async Task<Game[]> IGamesAccessor.FilterAsync(string query)
+    {
+        var attempts = 0;
+        while (attempts < 5)
         {
-            _iGDBClient = new IGDBClient(configuration.ClientId, configuration.ClientSecret);
-        }
-        public async Task<Game[]> QueryGamesAsync(string query)
-        {
-            var attempts = 0;
-            while (attempts < 5)
+            try
             {
-                try
+                var clientGames = await _iGDBClient.QueryAsync<IGDB.Models.Game>(IGDBClient.Endpoints.Games, query: query);
+                return clientGames.Select(x =>
                 {
-                    var clientGames = await _iGDBClient.QueryAsync<IGDB.Models.Game>(IGDBClient.Endpoints.Games, query: query);
-                    return clientGames.Select(x =>
+                    return new Game
                     {
-                        return new Game
-                        {
-                            Id = x.Id ?? 0,
-                            Title = x.Name,
-                            Summary = x.Summary,
-                            FirstReleaseDate = x.FirstReleaseDate ?? DateTimeOffset.MinValue,
-                            PlatformIds = x.Platforms.Ids.ToList(),
-                            Name = x.Name
-                        };
-                    }
-                    ).ToArray();
+                        Id = x.Id ?? 0,
+                        Title = x.Name,
+                        Summary = x.Summary,
+                        FirstReleaseDate = x.FirstReleaseDate ?? DateTimeOffset.MinValue,
+                        PlatformIds = x.Platforms.Ids.ToList(),
+                        Name = x.Name
+                    };
                 }
-                catch (ApiException)
-                {
-                    attempts++;
-                    Thread.Sleep(1000);
-                }
+                ).ToArray();
             }
-            throw new Exception("TOo Many Requests");
-        }
-
-        public async Task<PlatformFamily[]> QueryPlatformFamiliesAsync(string query)
-        {
-            var clientPlatformFamilies = await _iGDBClient.QueryAsync<IGDB.Models.PlatformFamily>(IGDBClient.Endpoints.PlatformFamilies, query);
-
-            return clientPlatformFamilies.Select(x =>
+            catch (ApiException)
             {
-                return new PlatformFamily { Name = x.Name, Id = (int)(x.Id ?? 0) };
-            }).ToArray();
+                attempts++;
+                Thread.Sleep(1000);
+            }
         }
+        throw new Exception("TOo Many Requests");
+    }
 
-        public async Task<Platform[]> QueryPlatformsAsync(string query)
+    async Task<PlatformFamily[]> IPlatformFamiliesAccessor.FilterAsync(string query)
+    {
+        var clientPlatformFamilies = await _iGDBClient.QueryAsync<IGDB.Models.PlatformFamily>(IGDBClient.Endpoints.PlatformFamilies, query);
+
+        return clientPlatformFamilies.Select(x =>
         {
-            var clientPlatforms = await _iGDBClient.QueryAsync<IGDB.Models.Platform>(IGDBClient.Endpoints.Platforms, query);
-            return clientPlatforms.Select(x =>
+            return new PlatformFamily { Name = x.Name, Id = (int)(x.Id ?? 0) };
+        }).ToArray();
+    }
+
+    async Task<Platform[]> IPlatformsAccessor.FilterAsync(string query)
+    {
+        var clientPlatforms = await _iGDBClient.QueryAsync<IGDB.Models.Platform>(IGDBClient.Endpoints.Platforms, query);
+        return clientPlatforms.Select(x =>
+        {
+            return new Platform
             {
-                return new Platform
-                {
-                    Name = x.Name,
-                    Id = (int)(x.Id ?? 0),
-                    PlatformFamily = x.PlatformFamily?.Id ?? 0
-                };
-            }).ToArray();
-        }
+                Name = x.Name,
+                Id = (int)(x.Id ?? 0),
+                PlatformFamily = x.PlatformFamily?.Id ?? 0
+            };
+        }).ToArray();
     }
 }

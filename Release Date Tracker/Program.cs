@@ -19,8 +19,7 @@ app.Run();
 
 void ConfigureServices(IServiceCollection services, ConfigurationManager configuration)
 {
-    services.AddSingleton<IIgdbAccessor, IgdbAccessor>();
-    services.AddSingleton<IGameTitleManager, GameTitleManager>();
+    services.AddSingleton<IIgdbManager, IgdbManager>();
     services.AddSingleton<NodaTime.IClock>(NodaTime.SystemClock.Instance);
     services.AddControllers();
     services.AddEndpointsApiExplorer();
@@ -31,7 +30,10 @@ void ConfigureServices(IServiceCollection services, ConfigurationManager configu
     if (igdbConfiguration != null)
     {
         services.AddSingleton(igdbConfiguration);
-        services.AddSingleton<ITwitchClient, TwitchClient>();
+        services.AddSingleton<IGamesAccessor, TwitchClient>();
+        services.AddSingleton<IPlatformsAccessor, TwitchClient>();
+        services.AddSingleton<IPlatformFamiliesAccessor, TwitchClient>();
+
     }
     else throw new Exception("No IGDB Configuration Section Present");
 

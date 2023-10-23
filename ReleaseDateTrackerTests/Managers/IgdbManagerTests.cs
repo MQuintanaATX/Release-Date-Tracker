@@ -4,25 +4,27 @@ using NodaTime;
 using NodaTime.Testing;
 using NSubstitute;
 using Release_Date_Tracker.Accessors;
-using Release_Date_Tracker.Clients;
+using Release_Date_Tracker.Managers;
 using Release_Date_Tracker.Models;
 using Release_Date_Tracker.Models.ClientModels;
 
-namespace ReleaseDateTrackerTests.Accessors
+namespace ReleaseDateTrackerTests.Managers
 {
-    public class IgdbAccessorTests
+    public class IgdbManagerTests
     {
         private readonly IClock _clockMock;
-        private readonly ITwitchClient _clientMock = Substitute.For<ITwitchClient>();
+        private readonly IGamesAccessor _gamesClient = Substitute.For<IGamesAccessor>();
+        private readonly IPlatformFamiliesAccessor _platformFamiliesClient = Substitute.For<IPlatformFamiliesAccessor>();
+        private readonly IPlatformsAccessor _platformsClient = Substitute.For<IPlatformsAccessor>();
 
         private Fixture _fixture = new Fixture();
 
-        private IgdbAccessor _sut;
-        public IgdbAccessorTests()
+        private IgdbManager _sut;
+        public IgdbManagerTests()
         {
             _clockMock = new FakeClock(Instant.FromUtc(2000, 1, 1, 0, 0));
 
-            _sut = new IgdbAccessor(_clientMock, _clockMock);
+            _sut = new IgdbManager(_clockMock, _gamesClient, _platformFamiliesClient, _platformsClient);
         }
 
         [Test]
@@ -34,10 +36,10 @@ namespace ReleaseDateTrackerTests.Accessors
                 .CreateMany(100)
                 .ToArray();
 
-            _clientMock.QueryGamesAsync(Arg.Any<string>())
+            _gamesClient.FilterAsync(Arg.Any<string>())
                 .Returns(games);
 
-            _clientMock.QueryPlatformsAsync(Arg.Any<string>())
+            _platformsClient.FilterAsync(Arg.Any<string>())
                 .Returns(new Platform[]
                 {
                     new()
@@ -48,7 +50,7 @@ namespace ReleaseDateTrackerTests.Accessors
                     }
                 });
 
-            _clientMock.QueryPlatformFamiliesAsync(Arg.Any<string>())
+            _platformFamiliesClient.FilterAsync(Arg.Any<string>())
                 .Returns(new PlatformFamily[]
                 {
                     new PlatformFamily()
@@ -60,15 +62,15 @@ namespace ReleaseDateTrackerTests.Accessors
 
             var titles = new Dictionary<long, GameTitle>();
 
-            foreach(var game in games)
+            foreach (var game in games)
             {
 
                 var gameTitle = new GameTitle
                 {
-                    Id = (long)game.Id,
+                    Id = game.Id,
                     Title = game.Name,
                     ReleaseDate = game.FirstReleaseDate,
-                    Platforms = new List<string> { "Platform"},
+                    Platforms = new List<string> { "Platform" },
                     Description = game.Summary
                 };
                 titles.Add(game.Id, gameTitle);

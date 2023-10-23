@@ -26,4 +26,8 @@
     <ProjectReference Include="..\Release Date Tracker\ReleaseDateTracker.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Accessors\" />
+  </ItemGroup>
+
 </Project>

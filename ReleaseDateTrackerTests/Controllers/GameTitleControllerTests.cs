@@ -8,37 +8,38 @@ namespace ReleaseDateTrackerTests.Controllers
 {
     public class GameTitleControllerTests
     {
-        private readonly IGameTitleManager _gameTitleManagerMock = Substitute.For<IGameTitleManager>();
+        private readonly IIgdbManager _igdbManager = Substitute.For<IIgdbManager>();
 
         private readonly GameTitleController _sut;
 
         public GameTitleControllerTests() 
         { 
-            _sut = new GameTitleController(_gameTitleManagerMock);
+            _sut = new GameTitleController(_igdbManager);
         }
 
         [Test]
         public async Task GetAllGames_CallsManager()
         {
             /* Arrange */
-            var expectedGameTitles = new List<GameTitle>
+            var titles = new GameTitles
+            {
+                Titles = new Dictionary<long, GameTitle>
                 {
-                    new()
-                    {
-                       Title = "My name",
-                       Id = 1,
-                    }
-                };
+                    {1, new GameTitle{ Title = "My Name", Id = 1 }}
+                },
+                LastRetrievedDate = DateTime.UtcNow,
+            };
 
-            _gameTitleManagerMock.GetAllGames()
-                .Returns(expectedGameTitles);
+            var expectedGameTitles = titles.Titles.Values.ToList();
+            _igdbManager.GetGameAllTitlesAsync()
+                .Returns(titles);
 
             /* Act */
             var actualGameTitles = await _sut.GetAllTitlesAsync();
 
             /* Assert */
             actualGameTitles.Should().BeEquivalentTo(expectedGameTitles);
-            await _gameTitleManagerMock.Received().GetAllGames();
+            await _igdbManager.Received().GetGameAllTitlesAsync();
         }
     }
 }
